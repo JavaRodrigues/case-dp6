@@ -20,15 +20,3 @@ gtag('js', new Date());
 gtag('config', ga4Id);
 
 console.log(`GA4 com ID ${ga4Id} configurado.`);
-
-// Exemplo: Rastrear o envio do formulário de contato
-jQuery(document).ready(function($) {
-  $('.contato').on('submit', function() {
-    console.log('Formulário de contato enviado. Disparando evento para o GA4...');
-    gtag('event', 'generate_lead', {
-      'event_category': 'contato',
-      'event_label': 'envio_formulario'
-    });
-    console.log('Evento "generate_lead" enviado!');
-  });
-});
