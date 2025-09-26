@@ -55,27 +55,34 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 
-  // Evento: view_form_success (Disparado quando o popup de sucesso é exibido)
-  // Usa um MutationObserver para detectar a adição da classe 'lightbox-open' no body,
-  // que indica a exibição do popup.
-  const observer = new MutationObserver(function(mutations) {
-    mutations.forEach(function(mutation) {
-      if (mutation.attributeName === "class" && mutation.target.classList.contains('lightbox-open')) {
-        const formElement = document.querySelector('.contato');
-        const lightboxTitle = document.querySelector('.lightbox-title');
-        // Verifica se o popup é o de sucesso do formulário
-        if (formElement && lightboxTitle && lightboxTitle.textContent === 'Contato enviado') {
-          gtag('event', 'view_form_success', {
-            'form_id': formElement.id,
-            'form_name': formElement.name,
-            'page_location': window.location.href
-          });
-          console.log("Evento GA: view_form_success enviado.");
+  // Otimização: O formulário e o evento de sucesso só existem na página 'sobre.html'.
+  // Portanto, o MutationObserver só precisa ser ativado nessa página.
+  if (document.body.classList.contains('sobre')) {
+    // Evento: view_form_success (Disparado quando o popup de sucesso é exibido)
+    // Usa um MutationObserver para detectar a adição da classe 'lightbox-open' no body,
+    // que indica a exibição do popup.
+    const successObserver = new MutationObserver(function(mutations, observer) {
+      for (const mutation of mutations) {
+        if (mutation.attributeName === "class" && mutation.target.classList.contains('lightbox-open')) {
+          const lightboxTitle = document.querySelector('.lightbox-title');
+          // Verifica se o popup é o de sucesso do formulário
+          if (lightboxTitle && lightboxTitle.textContent === 'Contato enviado') {
+            const formElement = document.querySelector('.contato');
+            gtag('event', 'view_form_success', {
+              'form_id': formElement.id,
+              'form_name': formElement.name,
+              'page_location': window.location.href
+            });
+            console.log("Evento GA: view_form_success enviado.");
+            // Desconecta o observer para evitar sobrecarga, pois o evento já foi capturado.
+            observer.disconnect();
+            break; // Sai do loop de mutações
+          }
         }
       }
     });
-  });
-  observer.observe(document.body, { attributes: true });
+    successObserver.observe(document.body, { attributes: true });
+  }
 
   // Evento: menu_click (Clique nos itens do menu, exceto contato e download)
   document.querySelectorAll('.menu-lista-link:not(.menu-lista-contato, .menu-lista-download)').forEach(function(link) {
